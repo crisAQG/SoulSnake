@@ -1,0 +1,9 @@
+Version 0.10.05
+Se construye el directorio y su estructura interna.
+Se añade modulos principales:
+    + Config y Main: Configuraciones generales y lanzador del juego.
+    + Window: Ventana pygame
+    + Entities, Items: Archivos para las clases base item y entity y sus hijos
+    + SpriteSheet: Modulo de selector de spritesheet
+    + Scene: Modulo base de escenas (vistas)
+    + Modulos en carpeta Scene/Scenes: Escenas del juego
