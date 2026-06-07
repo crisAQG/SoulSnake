@@ -1,7 +1,8 @@
 import pygame
 
+from Data.Modules.Scene.Scenes import Menu, Test
 from Config import *
-from Data.Modules.Scene.Scenes import test
+
 
 class Window:
     def __init__(self):
@@ -10,7 +11,7 @@ class Window:
         self.clock = pygame.time.Clock()
         self.running = True
 
-        self.scene = self.set_scene(test.test(self))
+        self.set_scene(Test.Test(self))
 
     def set_scene(self, scene):
         """

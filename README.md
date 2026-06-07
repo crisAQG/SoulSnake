@@ -4,4 +4,4 @@ SoulSnake es un juego creado por estudiantes de Ingenieria civil Informatica de 
 ---
 
 ### Archivo releases:
-Las notas de actualizaciones del proyecto se guardaran en el archivo releases, este contendra los cambios del proyecto
+Las notas de actualizaciones del proyecto se guardaran en el archivo releases, este contendra los cambios del proyecto.

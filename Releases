@@ -7,3 +7,5 @@ Se añade modulos principales:
     + SpriteSheet: Modulo de selector de spritesheet
     + Scene: Modulo base de escenas (vistas)
     + Modulos en carpeta Scene/Scenes: Escenas del juego
+
+Version 0.06.06
