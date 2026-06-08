@@ -1,7 +1,7 @@
 import pygame
 import math
 
-from Data.Modules.Type.SpriteSheet import SpriteSheet
+from G5.Data.Modules.Type.SpriteSheet import SpriteSheet
 
 
 class Tile:
@@ -20,18 +20,14 @@ class Tile:
         self.y = y
         self.w = w
         self.h = h
-
-        try: 
-            self.spr = SpriteSheet(file_path).get_spr(0, 0, 32, 32)
-            self.rect = self.spr.get_rect(topleft=(x, y))
-            self.centerx = self.surf.get_rect().centerx
-            self.centery = self.surf.get_rect().centery
-        
-        except:
-            self.surf = pygame.Surface([w, h])
+        try:
+            self.surf = SpriteSheet(file_path).get_spr(0, 0, 32, 32)
             self.rect = self.surf.get_rect(topleft=(x, y))
+            self.use_sprite = True
+        except:
             self.color = color
             self.form = form
+            self.use_sprite = False
 
     def set_vh(self):
         """
@@ -48,10 +44,9 @@ class Tile:
         return vertices
     
     def draw(self, screen):
-        try: 
-            screen.blit(self.image)
-        
-        except: 
+        if self.use_sprite:
+            screen.blit(self.surf, self.rect)
+        else:
             match self.form:
                 case 0:
                     pygame.draw.rect(screen, self.color, (self.x, self.y, self.w, self.h))

@@ -1,9 +1,5 @@
-from Data.Modules.Scene.Scene import Scene
-
-
-class Outro(Scene):
+class Scene:
     def __init__(self, game):
-        super().__init__(game)
         self.game = game
 
     def events(self, event):
@@ -14,4 +10,3 @@ class Outro(Scene):
 
     def draw(self, screen):
         pass
-    

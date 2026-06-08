@@ -1,7 +1,7 @@
 import sys
 import pygame
-import math
-from Data.Modules.Window import Window
+
+from G5.Data.Modules.Window import Window
 
 
 if __name__ == '__main__':

@@ -9,3 +9,10 @@ Se añade modulos principales:
     + Modulos en carpeta Scene/Scenes: Escenas del juego
 
 Version 0.07.06
+Se añaden los siguientes modulos:
+    + Se crea la carpeta Services
+    + Se crea modulo MapGen
+    + Se crea clase Player y Enemies dentro del modulo Entities
+    + Se crea modulo Blocks
+    + se crea clase Tile
+    + Se modifican escenas y movilidad
