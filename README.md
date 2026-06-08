@@ -47,7 +47,9 @@ Blocks.py: Modulos de bloques y estructuras en general
     Tile: Bloque tile donde dibuja un sprite o una forma de color
         + x, y: posicion en pantalla
         + w, h: tamaño (w: ancho, h: alto)
-        +
+        + color: se ingresa el color de una forma en (r, g, b)
+        + form: se ingresa el tipo de forma con el id correspondiente (mirar modulo)
+        + file_path: en caso de tener una imagen para el tile, se crea un tile como imagen
 
 ---
 
