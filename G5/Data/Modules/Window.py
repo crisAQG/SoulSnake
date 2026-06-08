@@ -1,7 +1,8 @@
 import pygame
 
-from Data.Modules.Scene.Scenes import Menu, Test
+from G5.Data.Modules.Scene.Scenes import Test
 from Config import *
+from G5.Data.Modules.Scene.Scenes import Menu
 
 
 class Window:
@@ -10,8 +11,12 @@ class Window:
         self.screen = pygame.display.set_mode(screen_size)
         self.clock = pygame.time.Clock()
         self.running = True
+        pygame.display.set_caption("SoulSnake")
 
-        self.set_scene(Test.Test(self))
+        self.scene = None
+        self.font = pygame.font.Font(None, 24)
+
+        self.set_scene(Menu.Menu(self))
 
     def set_scene(self, scene):
         """

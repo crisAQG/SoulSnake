@@ -1,4 +1,4 @@
-from Data.Modules.Scene.Scene import Scene
+from G5.Data.Modules.Scene.Scene import Scene
 
 
 class Outro(Scene):
