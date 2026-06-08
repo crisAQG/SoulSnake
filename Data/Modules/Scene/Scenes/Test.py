@@ -1,5 +1,5 @@
 from Data.Modules.Scene.Scene import Scene
-from Data.Modules.Type.Tiles import Tile
+from Data.Modules.Type.Blocks import Tile
 
 import pygame
 

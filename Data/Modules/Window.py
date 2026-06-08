@@ -10,6 +10,9 @@ class Window:
         self.screen = pygame.display.set_mode(screen_size)
         self.clock = pygame.time.Clock()
         self.running = True
+        pygame.display.set_caption("SoulSnake")
+
+        self.scene = None
 
         self.set_scene(Test.Test(self))
 
