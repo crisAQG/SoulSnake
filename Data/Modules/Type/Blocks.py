@@ -5,7 +5,7 @@ from Data.Modules.Type.SpriteSheet import SpriteSheet
 
 
 class Tile:
-    def __init__(self, x: int, y: int, w: int, h: int, color: tuple, form: int, file_path: str):
+    def __init__(self, x: int, y: int, w: int, h: int, color: tuple, form: int, file_path: str = None):
         """
         Generador de casillas
 
@@ -20,14 +20,18 @@ class Tile:
         self.y = y
         self.w = w
         self.h = h
-        self.color = color
-        self.form = form
-        self.spr = SpriteSheet(file_path).get_spr(0, 0, 32, 32)
-        self.rect = self.spr.get_rect(topleft=(x, y))
 
-        self.surf = pygame.Surface([w, h])
-        self.centerx = self.surf.get_rect().centerx
-        self.centery = self.surf.get_rect().centery
+        try: 
+            self.spr = SpriteSheet(file_path).get_spr(0, 0, 32, 32)
+            self.rect = self.spr.get_rect(topleft=(x, y))
+            self.centerx = self.surf.get_rect().centerx
+            self.centery = self.surf.get_rect().centery
+        
+        except:
+            self.surf = pygame.Surface([w, h])
+            self.rect = self.surf.get_rect(topleft=(x, y))
+            self.color = color
+            self.form = form
 
     def set_vh(self):
         """
@@ -59,3 +63,4 @@ class Tile:
                     pygame.draw.polygon(screen, self.color, [(self.w  + self.x, self.y), (self.x, self.y), (self.w/2  + self.x, self.h + self.y)])
                 case 4:
                     pygame.draw.circle(screen, self.color, (self.x + self.w/2, self.y + self.h/2), 16)
+

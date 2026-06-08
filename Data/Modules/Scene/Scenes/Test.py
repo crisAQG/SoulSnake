@@ -1,5 +1,6 @@
 from Data.Modules.Scene.Scene import Scene
 from Data.Modules.Type.Blocks import Tile
+from Data.Modules.Scene.Scenes.Menu import Menu
 
 import pygame
 
@@ -15,7 +16,7 @@ class Test(Scene):
         self.circ = Tile(128, 32, 32, 32, (244, 40, 40), 4)
 
     def events(self, event):
-        pass
+        self.game.set_scene(Menu)
 
     def update(self):
         pass

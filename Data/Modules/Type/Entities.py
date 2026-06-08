@@ -1,9 +1,15 @@
-import pygame
 import math
+
+import pygame
+<<<<<<< HEAD
+import math
+=======
+from Data.Modules.Type.SpriteSheet import SpriteSheet
+>>>>>>> 1488800a52be217f6875d3217a3350f0688850b7
 
 
 class Entities:
-    def __init__(self, x: int, y: int, size: tuple, color: tuple, spd: float, hp: int, dmg: int, spr: pygame.Surface = None):
+    def __init__(self, x: int, y: int, size: tuple, color: tuple, spd: float, hp: int, dmg: int, spr: str = None):
         self.x = x
         self.y = y
         self.w = size[0]
@@ -16,13 +22,20 @@ class Entities:
         self.hp = hp
         self.dmg = dmg
 
+<<<<<<< HEAD
 class Player (Entities):
     def __init__(self, x, y, size, color, spd, hp, dmg, spr = None):
+=======
+        
+class Enemies(Entities):
+    def __init__(self, x: int, y: int, size: tuple, color: tuple, spd: float, hp: int, dmg: int, spr: str = None):
+>>>>>>> 1488800a52be217f6875d3217a3350f0688850b7
         super().__init__(x, y, size, color, spd, hp, dmg, spr)
         self.x = x
         self.y = y
         self.w = size[0]
         self.h = size[1]
+<<<<<<< HEAD
         if spr is not None: 
             self.spr = spr
         else:
@@ -32,6 +45,22 @@ class Player (Entities):
         self.dmg = dmg
 
     def set_vh(self):
+=======
+        try:      
+            self.spr = SpriteSheet(spr).get_spr(0, 0, 32, 32)
+            self.rect = self.spr.get_rect(topleft=(x, y))
+            self.centerx = self.surf.get_rect().centerx
+            self.centery = self.surf.get_rect().centery
+        except:
+            self.surf = pygame.Surface([w, h])
+            self.rect
+            self.color = color
+        self.spd = spd
+        self.hp = hp
+        self.dmg = dmg
+        
+        def set_vh(self):
+>>>>>>> 1488800a52be217f6875d3217a3350f0688850b7
             """
             Genera los vertices de la forma hexagonal
             """
@@ -44,6 +73,7 @@ class Player (Entities):
                 vertices.append((int(vx + self.w/2), int(vy + self.w/2)))
             
             return vertices
+<<<<<<< HEAD
 
     def cambiar_direccion(self, keys, direccion_actual):
         """
@@ -131,3 +161,12 @@ class Player (Entities):
 
     def draw(self, screen):
         pass
+=======
+        
+    def draw(self, screen):
+            try: 
+                screen.blit(self.image)
+            
+            except: 
+                pygame.draw.polygon(screen, self.color, self.set_vh())
+>>>>>>> 1488800a52be217f6875d3217a3350f0688850b7

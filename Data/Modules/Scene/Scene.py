@@ -1,5 +1,8 @@
+from Data.Modules.Window import Window
+
+
 class Scene:
-    def __init__(self, game):
+    def __init__(self, game: Window):
         self.game = game
 
     def events(self, event):
