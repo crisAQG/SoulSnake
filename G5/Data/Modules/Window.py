@@ -1,6 +1,5 @@
 import pygame
 
-from G5.Data.Modules.Scene.Scenes import Test
 from Config import *
 from G5.Data.Modules.Scene.Scenes import Menu
 

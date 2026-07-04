@@ -1,0 +1,10 @@
+Jugador: Puede consumir items (copas para aumentar 1 tile de tamaño, cuchillo para atacar al jefe final), puede atacar a enemigos cuando hace sprint (tecla shift, consume un largo de cola).
+Enemigo: puede atacar al jugador, 2 tipos de enemigos: arquero (1ra hasta 3ra ronda, hace 1 de daño (1 cuadro de cola)); mago (4ta hasta 5ta ronda, hace 2 de daño (2 cuadros de cola)).
+Jefe final: aparece en la ultima ronda (6ta), posee mecanicas de ataque estilo undertale donde ataca y tiene periodos donde descansa y el jugador puede atacar de vuelta. hace 3 de daño.
+Partida: posee enemigos items y obstaculos. consta de rondas, cada ronda se acaba cuando se cumple las siguientes condiciones
+- ronda 1: el jugador mata 2 enemigos y consume 4 copas
+- ronda 2: el jugador mata 3 enemigos y consume 6 copas
+- ronda 3: el jugador mata 4 enemigos y consume 7 copas
+- ronda 4: el jugador mata 3 enemigos y consume 7 copas
+- ronda 5: el jugador mata 5 enemigos y consume 9 copas
+- ronda final: el jugador mata al jefe final (no hay enemigos ni obstaculos)
