@@ -6,6 +6,15 @@ import pygame
 
 
 class Game(Scene):
+    # Requisitos para pasar de ronda: {ronda: (enemigos_a_matar, copas_a_consumir)}
+    REQUISITOS_RONDA = {
+        1: (2, 4),
+        2: (3, 6),
+        3: (4, 7),
+        4: (3, 7),
+        5: (5, 9),
+    }
+
     def __init__(self, game):
         super().__init__(game)
         self.game = game
@@ -16,39 +25,79 @@ class Game(Scene):
         self.map = MapGen()
         self.tab = self.map.map
 
-        pos_inicial = self.map.gen_object(1)[0]  # coloca al jugador y devuelve (col, fila)
+        pos_inicial = self.map.gen_object(1)[0]
         self.pos_logica = pos_inicial
 
-        # Calculamos la posición en píxeles para que pos_visual empiece ya centrada
-        px_inicial = pos_inicial[0] * 32
-        py_inicial = pos_inicial[1] * 32
-        self.plr = Player((px_inicial, py_inicial), (32, 32), (10, 30, 170), 0, 0, 0)
-
-        # Sincronizamos pos_visual y pos_destino desde el inicio
+        px_inicial = (pos_inicial[0] * 32) + 288
+        py_inicial =( pos_inicial[1] * 32) + 96
+        self.plr = Player((px_inicial, py_inicial), (32, 32), (10, 30, 170), 0, 0, 0,
+                   spr_cabeza_sola="G5/Data/Sprites/jugador_cabeza_sola.png",
+                   spr_cabeza="G5/Data/Sprites/Jugador cabeza.png",
+                   spr_torso="G5/Data/Sprites/Jugador torso.png",
+                   spr_cola="G5/Data/Sprites/Jugador cola.png")
         self.plr.pos_visual = [float(px_inicial), float(py_inicial)]
         self.plr.pos_destino = [float(px_inicial), float(py_inicial)]
 
-        self.direccion = (1, 0)   # empieza moviéndose a la derecha
+        self.direccion = (1, 0)
 
-        # Guardamos el momento en que arrancó la escena
         self.inicio = pygame.time.get_ticks()
-
-        # Temporizador lógico: la grilla avanza cada 200ms
         self.tick = 0
         self.intervalo = 200
+        self.intervalo_sprint = 100
+        self.sprint_inicio = None 
 
-        # ── FASES DEL JUEGO ───────────────────────────────────────────────────
-        # "vista"      → se muestra el mapa durante 3 segundos (jugador no se mueve)
-        # "countdown"  → cuenta regresiva 3, 2, 1 (otros 3 segundos)
-        # "jugando"    → partida en curso
         self.fase = "vista"
-
-        self.txt_vista     = self.fuente.render("¡Memoriza el mapa!", True, (255, 255, 255))
+        self.txt_vista = self.fuente.render("¡Memoriza el mapa!", True, (255, 255, 255))
         self.txt_countdown = self.fuente.render("El juego empieza en: 3", True, (255, 255, 255))
 
-        # Texto de copa (aparece brevemente al consumir una)
         self.texto_copa = None
         self.texto_copa_hasta = 0
+
+        # ── RONDAS Y PUNTAJE ─────────────────────────────────────────────────
+        self.ronda = 1
+        self.enemigos_ronda = 0   # se resetean al pasar de ronda
+        self.copas_ronda = 0
+        self.enemigos_totales = 0  # cuentan TODA la partida, para el puntaje final
+        self.copas_totales = 0
+
+        self.texto_evento = None
+        self.texto_evento_hasta = 0
+
+    def _mostrar_evento(self, texto, color=(255, 120, 120), ms=2000):
+        self.texto_evento = self.fuente.render(texto, True, color)
+        self.texto_evento_hasta = pygame.time.get_ticks() + ms
+
+    def _ir_a_outro(self, gano: int):
+        from G5.Data.Modules.Scene.Scenes.Outro import Outro
+        puntaje = self.copas_totales * 10 + self.enemigos_totales * 25
+        self.game.set_scene(Outro(self.game, gano, self.copas_totales, self.enemigos_totales, puntaje))
+
+    def _revisar_avance_ronda(self):
+        requisito = self.REQUISITOS_RONDA.get(self.ronda)
+        if requisito is None:
+            return
+
+        enemigos_req, copas_req = requisito
+        if self.enemigos_ronda >= enemigos_req and self.copas_ronda >= copas_req:
+            self.ronda += 1
+            self.enemigos_ronda = 0
+            self.copas_ronda = 0
+            self._mostrar_evento(f"¡Ronda {self.ronda}!", (120, 220, 255), 2500)
+
+            # TODO: la ronda 6 es el jefe final (mecánica tipo Undertale, con
+            # turnos de ataque/descanso). Todavía no está implementada; por
+            # ahora, llegar a ronda 6 se trata como victoria de la partida.
+            if self.ronda == 2:
+                self.map.gen_enemies(2)
+            if self.ronda == 3:
+                self.map.gen_enemies(3)
+            if self.ronda == 4:
+                self.map.gen_enemies(3, 2)
+            if self.ronda == 5:
+                self.map.gen_enemies(5, 2)
+            if self.ronda >= 6:
+                self.map.gen_boss()
+                self._mostrar_evento("¡Apareció el jefe final!", (255, 60, 60), 3000)
 
     def events(self, event):
         if event.type == pygame.KEYDOWN:
@@ -58,17 +107,14 @@ class Game(Scene):
 
     def update(self):
         ahora = pygame.time.get_ticks()
-        tiempo_pasado = ahora - self.inicio   # ms desde que arrancó la escena
+        tiempo_pasado = ahora - self.inicio
 
-        # ── Fase 1: vista del mapa (0 – 3 000 ms) ────────────────────────────
         if self.fase == "vista":
             if tiempo_pasado >= 3000:
-                # Pasamos a la cuenta regresiva y reiniciamos el reloj
                 self.fase = "countdown"
                 self.inicio = pygame.time.get_ticks()
-            return   # el jugador no se mueve todavía
+            return
 
-        # ── Fase 2: cuenta regresiva (0 – 3 000 ms desde el cambio de fase) ──
         if self.fase == "countdown":
             if tiempo_pasado < 1000:
                 self.txt_countdown = self.fuente.render("El juego empieza en: 3", True, (255, 255, 255))
@@ -78,42 +124,71 @@ class Game(Scene):
                 self.txt_countdown = self.fuente.render("El juego empieza en: 1", True, (255, 255, 255))
             else:
                 self.fase = "jugando"
-                self.tick = pygame.time.get_ticks()   # reseteamos el tick para que no salte
-            return   # el jugador todavía no se mueve
+                self.tick = pygame.time.get_ticks()
+            return
 
-        # ── Fase 3: juego en curso ────────────────────────────────────────────
-
-        # Suavizado visual (60 veces por segundo)
         self.plr.update_visual()
 
-        # Lógica de la grilla (cada 200ms)
+        cola_set = set(self.plr.cola)
+        eventos = self.map.actualizar_enemigos(ahora, self.pos_logica, cola_set, self.plr)
+        eventos += self.map.actualizar_balas(self.plr)
+        for ev in eventos:
+            if ev == "derrota":
+                self._ir_a_outro(0)
+                return
+            self._mostrar_evento(ev)
+
+        # ── Movimiento del jugador (cada 200ms) ──────────────────────────────
         if ahora - self.tick >= self.intervalo:
-            self.tick = ahora
-            self.direccion = self.plr.cambiar_direccion(self.direccion)
-            resultado, self.pos_logica = self.plr.avanzar(self.tab, self.direccion, self.pos_logica)
+            shift_apretado = self.plr.esta_sprintando()
+            if shift_apretado:
+                if self.sprint_inicio is None:
+                    self.sprint_inicio = ahora
+                sprint_activo = (ahora - self.sprint_inicio) < 4000
+            else:
+                self.sprint_inicio = None
+                sprint_activo = False
 
-            if resultado == "derrota":
-                from G5.Data.Modules.Scene.Scenes.Outro import Outro
-                self.game.set_scene(Outro(self.game, 0))
+            intervalo_actual = self.intervalo_sprint if sprint_activo else self.intervalo
 
-            elif resultado == "copa":
-                self.texto_copa = self.fuente.render("¡Copa consumida! +1 segmento.", True, (255, 215, 0))
-                self.texto_copa_hasta = ahora + 2000
-                self.map.gen_object(4, 1)   # nueva copa en el mapa
+            if ahora - self.tick >= intervalo_actual:
+                self.tick = ahora
+                self.direccion = self.plr.cambiar_direccion(self.direccion)
+                resultado, self.pos_logica = self.plr.avanzar(
+                    self.tab, self.direccion, self.pos_logica, sprint_activo, self.map
+                )
+
+                if resultado == "derrota":
+                    self._ir_a_outro(0)
+
+                elif resultado == "copa":
+                    self.copas_ronda += 1
+                    self.copas_totales += 1
+                    self.texto_copa = self.fuente.render("¡Copa consumida! +1 segmento.", True, (255, 215, 0))
+                    self.texto_copa_hasta = ahora + 2000
+                    self.map.gen_object(4, 1)
+                    self._revisar_avance_ronda()
+
+                elif resultado == "enemigo_muerto":
+                    self.enemigos_ronda += 1
+                    self.enemigos_totales += 1
+                    self._mostrar_evento("¡Enemigo eliminado con sprint!", (120, 255, 120))
+                    if self.ronda == 6 and not self.map.enemies:
+                        self._ir_a_outro(1)
+                    else:
+                        self._revisar_avance_ronda()
+
+                elif resultado == "victoria":
+                    self._ir_a_outro(1)
 
             elif resultado == "victoria":
-                from G5.Data.Modules.Scene.Scenes.Outro import Outro
-                self.game.set_scene(Outro(self.game, 1))
+                self._ir_a_outro(1)
 
     def draw(self, screen):
         screen.fill((139, 153, 160))
-
-        # El mapa se dibuja en las tres fases (incluyendo al jugador)
         self.map.draw(screen, self.plr)
 
-        # ── Texto superpuesto según la fase ───────────────────────────────────
         if self.fase == "vista":
-            # Fondo semitransparente para que el texto se lea bien
             overlay = pygame.Surface((15 * 32, 32), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 140))
             screen.blit(overlay, (0, 32 * 7 - 4))
@@ -125,8 +200,16 @@ class Game(Scene):
             screen.blit(overlay, (0, 32 * 7 - 4))
             screen.blit(self.txt_countdown, (32 * 3, 32 * 7))
 
-        # Texto de copa (si está activo)
         if self.texto_copa and pygame.time.get_ticks() < self.texto_copa_hasta:
             screen.blit(self.texto_copa, (32 * 2, 32 * 19))
+
+        if self.texto_evento and pygame.time.get_ticks() < self.texto_evento_hasta:
+            screen.blit(self.texto_evento, (32 * 2, 32 * 18))
+
+        hud = self.fuente.render(
+            f"Ronda {self.ronda}  |  Enemigos: {self.enemigos_ronda}  Copas: {self.copas_ronda}",
+            True, (255, 255, 255)
+        )
+        screen.blit(hud, (32 * 2, 0))
 
         screen.blit(self.volver_txt, (0, 32 * 20))
