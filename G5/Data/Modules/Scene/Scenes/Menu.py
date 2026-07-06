@@ -1,7 +1,7 @@
 from G5.Data.Modules.Scene.Scene import Scene
 import pygame
 
-from Config import musica
+import Config
 from G5.Data.Modules.Scene.Scenes import LorePreGame
 
 
@@ -16,7 +16,7 @@ class Menu(Scene):
         self.Exit_txt = self.fuente.render("Presione [E] para salir.", True, (255, 255, 255))
         
         pygame.mixer.music.load("G5/Data/Sounds/menu.mp3")
-        pygame.mixer.music.set_volume(musica)
+        pygame.mixer.music.set_volume(Config.musica)
         pygame.mixer.music.play(-1)
 
     def events(self, event):

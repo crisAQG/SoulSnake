@@ -1,7 +1,7 @@
 from G5.Data.Modules.Type.Blocks import Tile
 from G5.Data.Modules.Type.SpriteSheet import SpriteSheet
 from G5.Data.Modules.Type.Entities import Enemy, Bullet, Boss
-from Config import sfx
+import Config
 
 import random
 import pygame
@@ -12,7 +12,7 @@ class MapGen:
         self.map = self.gen_map()
         self.enemies = []
         self.bullets = []
-        self.cruces_fuego = []  # (col, fila, expira_en_ms) del ataque cargado del jefe
+        self.cruces_fuego = []
         self.gen_enemies(4)
         self.gen_object(3, 6)
         self.gen_object(4, 1)
@@ -59,6 +59,19 @@ class MapGen:
         jefe = Boss(((columna * 32) + 288, (fila * 32) + 96), "G5/Data/Sprites/cura.png")
         self.enemies.append(jefe)
 
+    def atacar_jefe(self):
+        for enemigo in self.enemies:
+            if isinstance(enemigo, Boss):
+                enemigo._atacado(True)
+                if enemigo.hp <= 0:
+                    col, fila = enemigo.pos_logica
+                    if self.map[fila][col] == 2:
+                        self.map[fila][col] = 0
+                    self.enemies.remove(enemigo)
+                    return True
+                return False
+        return False
+
     def matar_enemigo(self, col, fila):
         if self.map[fila][col] == 2:
             self.map[fila][col] = 0
@@ -102,7 +115,9 @@ class MapGen:
                         break
 
             if golpeo:
-                pygame.mixer.Sound("G5\Data\Sounds\death.mp3").set_volume(sfx).play()
+                self.temp = pygame.mixer.Sound("G5\Data\Sounds\death.mp3")
+                self.temp.set_volume(Config.sfx)
+                self.temp.play
                 murio = jugador.recibir_flechazo(self.map, bala.dmg)
                 eventos.append("¡Una flecha te dio!")
                 if murio:

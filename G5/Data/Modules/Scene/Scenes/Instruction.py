@@ -22,7 +22,7 @@ class Instructions(Scene):
         self.cuchillos = self.fuente.render("- Apareceran cuchillos aleatoreamente, al consumirlos podras atacar al jefe.", True, (255, 255, 255))
 
         self.ronda = self.fuente.render("Rondas:", True, (255, 255, 255))
-        self.ronda1 = self.fuente.render("1: Mata 2 enemigos y consume 4 copas.", True, (255, 255, 255))
+        self.ronda1 = self.fuente.render("1: Mata 2 enemigos y consume 3 copas.", True, (255, 255, 255))
         self.ronda2 = self.fuente.render("2: Mata 3 enemigos y consume 5 copas.", True, (255, 255, 255))
         self.ronda3 = self.fuente.render("3: Mata 4 enemigos y consume 7 copas.", True, (255, 255, 255))
         self.ronda4 = self.fuente.render("4: Mata 3 enemigos y consume 8 copas.", True, (255, 255, 255))

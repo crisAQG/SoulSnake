@@ -1,5 +1,5 @@
 from G5.Data.Modules.Scene.Scene import Scene
-from Config import musica
+import Config
 
 import pygame
 
@@ -19,12 +19,12 @@ class Outro(Scene):
         if state == 1:
             self.titulo = self.fuente.render("Ganaste, ¿pero habrá valido totalmente la pena?", True, (255, 255, 255))
             pygame.mixer.music.load("G5/Data/Sounds/outro-win.mp3")
-            pygame.mixer.music.set_volume(musica)
+            pygame.mixer.music.set_volume(Config.musica)
             pygame.mixer.music.play()
         else:
             self.titulo = self.fuente.render("Haz muerto en el intento, puedes volver a hacerlo.", True, (255, 255, 255))
             pygame.mixer.music.load("G5/Data/Sounds/outro-lose.mp3")
-            pygame.mixer.music.set_volume(musica)
+            pygame.mixer.music.set_volume(Config.musica)
             pygame.mixer.music.play(-1)
 
         self.stats_txt = self.fuente.render(

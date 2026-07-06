@@ -2,7 +2,7 @@ import pygame
 import random
 
 from G5.Data.Modules.Type.SpriteSheet import SpriteSheet
-from Config import sfx
+import Config
 
 
 OFFSET_X = 288
@@ -54,7 +54,8 @@ class Bullet(Entities):
 
     def fuera_de_mapa(self):
         x, y = self.pos_visual
-        return x < -20 or y < -20 or x > 15 * 32 + 20 or y > 15 * 32 + 20
+        return (x < OFFSET_X - 20 or y < OFFSET_Y - 20 or
+                x > OFFSET_X + 15 * 32 + 20 or y > OFFSET_Y + 15 * 32 + 20)
 
     def colisiona_con(self, px_centro, py_centro, radio=16):
         dx = self.pos_visual[0] - px_centro
@@ -165,7 +166,7 @@ class Boss(Enemy):
         self.contador_ataques = 0
         self.ultimo_cambio = pygame.time.get_ticks()
         self.duracion_reposo = 9000   # 9s de descanso por ciclo
-        self.duracion_alerta = 1000    # 1s de aviso antes de disparar
+        self.duracion_alerta = 2000    # 1s de aviso antes de disparar
         self.duracion_pausa = 1200      # pausa corta entre ataques rápidos
         self.velocidad_bala = 6
         self.hp = 20
@@ -205,15 +206,24 @@ class Boss(Enemy):
 
     def _ataque_cruz(self, map_gen):
         """Ataque rápido: 4 balas en cruz (arriba, abajo, izq, der)."""
+        print("ataque rapido")
         col, fila = self.pos_logica
         origen = (col * 32 + OFFSET_X, fila * 32 + OFFSET_Y)
+        temp = pygame.mixer.Sound("G5/Data/Sounds/fireball.mp3")
+        temp.set_volume(Config.sfx)
+        temp.play()
         for direccion in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (-1, 0), (1, 0)]:
-            map_gen.bullets.append(Bullet(origen, direccion, self.velocidad_bala, self.dmg, "G5/Data/Sprites/bola de fuego.png"))
+            map_gen.bullets.append(Bullet(origen, direccion, self.velocidad_bala, 1, "G5/Data/Sprites/bola de fuego.png"))
 
     def _ataque_cargado(self, map_gen, pos_jugador, cola_jugador, jugador):
         """Ataque cargado (cada 5to ataque): cruces de fuego en celdas random."""
+        print("ataque cargado")
         celdas = random.sample([(c, f) for f in range(15) for c in range(15)], 4)
         map_gen.cruces_fuego = [(c, f, pygame.time.get_ticks() + 800) for c, f in celdas]
+
+        temp = pygame.mixer.Sound("G5/Data/Sounds/fireball.mp3")
+        temp.set_volume(Config.sfx)
+        temp.play()
 
         eventos = []
         for c, f in celdas:
@@ -230,6 +240,7 @@ class Player(Entities):
                  spr_cabeza_sola=None, spr_cabeza=None, spr_torso=None, spr_cola=None):
         super().__init__(pos, size, color, spd, hp, dmg, spr)
         self.color = color
+        self.cuchillos = 0
 
         # ── Sprites por parte del cuerpo (cabeza sola / cabeza / torso / cola) ─
         self.spr_cabeza_sola = self._cargar_sprite(spr_cabeza_sola)
@@ -276,7 +287,9 @@ class Player(Entities):
                     self.cola_direccion.pop()
                 tablero[ultimo_fila][ultimo_col] = 0
                 self.cola_visual.pop()
-                pygame.mixer.Sound("G5\Data\Sounds\death.mp3").play()
+                temp = pygame.mixer.Sound("G5\Data\Sounds\death.mp3")
+                temp.set_volume(Config.sfx)
+                temp.play()
             else:
                 return True
         return False
@@ -316,7 +329,10 @@ class Player(Entities):
             if es_jefe:
                 return "derrota", pos_logica
             if sprintando and len(self.cola) > 0:
-                pygame.mixer.Sound("G5\Data\Sounds\death.mp3").set_volume(sfx).play()
+                temp = pygame.mixer.Sound("G5\Data\Sounds\death.mp3")
+                temp.set_volume(Config.sfx)
+                temp.play()
+
                 if map_gen:
                     map_gen.matar_enemigo(ind_nueva_col, ind_nueva_fila)
                 ultimo_col, ultimo_fila = self.cola.pop()

@@ -51,6 +51,7 @@ class Settings(Scene):
                 print(f"Musica: %{Config.musica}, SFX: %{Config.sfx}")
             Config.musica = round(Config.musica, 2)
             Config.sfx = round(Config.sfx, 2)
+            print(Config.musica)
 
     def update(self):
         pygame.mixer.music.set_volume(Config.musica)

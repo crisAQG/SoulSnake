@@ -1,6 +1,6 @@
 from G5.Data.Modules.Scene.Scene import Scene
 from G5.Data.Modules.Scene.Scenes.Instruction import Instructions
-from Config import musica
+import Config
 
 import pygame
 
@@ -29,7 +29,7 @@ class LorePreGame(Scene):
         self.count = 1
 
         pygame.mixer.music.load("G5/Data/Sounds/lore.mp3")
-        pygame.mixer.music.set_volume(musica)
+        pygame.mixer.music.set_volume(Config.musica)
         pygame.mixer.music.play(-1)
 
     def events(self, event):

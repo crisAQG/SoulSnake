@@ -1,26 +1,24 @@
 from G5.Data.Modules.Scene.Scene import Scene
 from G5.Data.Modules.Type.Entities import Player
 from G5.Data.Modules.Services.MapGen import MapGen
+from G5.Data.Modules.Type.SpriteSheet import SpriteSheet
+
+import Config
 
 import pygame
 
 
 class Game(Scene):
-    # Requisitos para pasar de ronda: {ronda: (enemigos_a_matar, copas_a_consumir)}
-    REQUISITOS_RONDA = {
-        1: (1, 3),
-        2: (2, 4),
-        3: (4, 6),
-        4: (2, 7),
-        5: (4, 8),
-    }
-
     def __init__(self, game):
         super().__init__(game)
         self.game = game
 
         self.fuente = game.font
         self.volver_txt = self.fuente.render("Presione [ESCAPE] para volver al menu.", True, (255, 255, 255))
+
+        self.bg_spr = SpriteSheet("G5\Data\Sprites\game.png").get_spr(0, 0, 1056, 672)
+
+        self.counter = 0
 
         self.map = MapGen()
         self.tab = self.map.map
@@ -54,10 +52,12 @@ class Game(Scene):
         self.texto_copa_hasta = 0
 
         # ── RONDAS Y PUNTAJE ─────────────────────────────────────────────────
-        self.ronda = 1
-        self.enemigos_ronda = 0   # se resetean al pasar de ronda
+        self.ronda = 0
+        self.enemigos_ronda = 0  
         self.copas_ronda = 0
-        self.enemigos_totales = 0  # cuentan TODA la partida, para el puntaje final
+        self.copa_base = 3
+        self.enemigos_totales = 0
+        self.enemigos_base = 2
         self.copas_totales = 0
 
         self.texto_evento = None
@@ -73,25 +73,28 @@ class Game(Scene):
         self.game.set_scene(Outro(self.game, gano, self.copas_totales, self.enemigos_totales, puntaje))
 
     def _revisar_avance_ronda(self):
-        requisito = self.REQUISITOS_RONDA.get(self.ronda)
-        if requisito is None:
-            return
-
-        enemigos_req, copas_req = requisito
-        if self.enemigos_ronda >= enemigos_req and self.copas_ronda >= copas_req:
+        if self.enemigos_totales >= self.enemigos_base and self.copas_totales >= self.copa_base:
             self.ronda += 1
             self.enemigos_ronda = 0
             self.copas_ronda = 0
             self._mostrar_evento(f"¡Ronda {self.ronda}!", (120, 220, 255), 2500)
 
             if self.ronda == 2:
+                self.enemigos_base = 5
+                self.copa_base = 8
                 self.map.gen_enemies(2)
             if self.ronda == 3:
-                self.map.gen_enemies(4)
+                self.copa_base = 15
+                self.enemigos_base = 9
+                self.map.gen_enemies(3)
             if self.ronda == 4:
-                self.map.gen_enemies(3, 2)
+                self.copa_base = 23
+                self.enemigos_base = 12
+                self.map.gen_enemies(2, 2)
             if self.ronda == 5:
-                self.map.gen_enemies(5, 2)
+                self.copa_base = 32
+                self.enemigos_base = 17
+                self.map.gen_enemies(4, 2)
             if self.ronda >= 6:
                 self.map.gen_object(6)
                 self.map.gen_boss()
@@ -142,7 +145,9 @@ class Game(Scene):
             if shift_apretado:
                 if self.sprint_inicio is None:
                     self.sprint_inicio = ahora
-                    pygame.mixer.Sound("G5\Data\Sounds\sprint.mp3").play()
+                    temp = pygame.mixer.Sound("G5\Data\Sounds\sprint.mp3")
+                    temp.set_volume(Config.sfx)
+                    temp.play()
                 sprint_activo = (ahora - self.sprint_inicio) < 4000
             else:
                 self.sprint_inicio = None
@@ -161,19 +166,30 @@ class Game(Scene):
                     self._ir_a_outro(0)
 
                 elif resultado == "copa":
-                    self.copas_ronda += 1
                     self.copas_totales += 1
                     self.texto_copa = self.fuente.render("¡Copa consumida! +1 segmento.", True, (255, 215, 0))
                     self.texto_copa_hasta = ahora + 2000
-                    self.map.gen_object(4, 1)
+                    self.map.gen_object(4)
                     self._revisar_avance_ronda()
 
                 elif resultado == "cuchillo":
-                    self.texto_copa = self.fuente.render("¡Atacaste al obispo! -1 de vida a tu enemigo.", True, (255, 215, 0))
-                    self.texto_copa_hasta = ahora + 2000
+                    self.counter +=1 
+                    temp = pygame.mixer.Sound("G5\Data\Sounds\death.mp3")
+                    temp.set_volume(Config.sfx)
+                    temp.play()
+                    jefe_murio = self.map.atacar_jefe()
+                    self.map.gen_object(6)
+
+                    if jefe_murio:
+                        self._mostrar_evento("¡Derrotaste al jefe final!", (120, 255, 120), 3000)
+                        self._ir_a_outro(1)
+                    else:
+                        self.texto_copa = self.fuente.render("¡Atacaste al jefe! -1 de vida.", True, (255, 215, 0))
+                        self.texto_copa_hasta = ahora + 1000
+                        self.texto_copa = self.fuente.render("Vida restante: " + str(20 - self.counter), True, (255, 215, 0))
+                        self.texto_copa_hasta = ahora + 1000
                     
                 elif resultado == "enemigo_muerto":
-                    self.enemigos_ronda += 1
                     self.enemigos_totales += 1
                     self._mostrar_evento("¡Enemigo muerto con sprint!", (120, 255, 120))
                     if self.ronda == 6 and not self.map.enemies:
@@ -188,7 +204,7 @@ class Game(Scene):
                 self._ir_a_outro(1)
 
     def draw(self, screen):
-        screen.fill((139, 153, 160))
+        screen.blit(self.bg_spr, (0,0))
         self.map.draw(screen, self.plr)
 
         if self.fase == "vista":
@@ -210,7 +226,7 @@ class Game(Scene):
             screen.blit(self.texto_evento, (32 * 2, 32 * 18))
 
         hud = self.fuente.render(
-            f"Ronda {self.ronda}  |  Enemigos: {self.enemigos_ronda}  Copas: {self.copas_ronda}",
+            f"Ronda {self.ronda}  |  Enemigos: {self.enemigos_totales}  Copas: {self.copas_totales}",
             True, (255, 255, 255)
         )
         screen.blit(hud, (32 * 2, 0))
