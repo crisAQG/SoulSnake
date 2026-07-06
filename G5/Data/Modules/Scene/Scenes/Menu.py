@@ -1,6 +1,7 @@
 from G5.Data.Modules.Scene.Scene import Scene
 import pygame
 
+from Config import musica
 from G5.Data.Modules.Scene.Scenes import LorePreGame
 
 
@@ -14,13 +15,18 @@ class Menu(Scene):
         self.Configuracion_txt = self.fuente.render("Presione [C] para ir a configuraciónes.", True, (255, 255, 255))
         self.Exit_txt = self.fuente.render("Presione [E] para salir.", True, (255, 255, 255))
         
+        pygame.mixer.music.load("G5/Data/Sounds/menu.mp3")
+        pygame.mixer.music.set_volume(musica)
+        pygame.mixer.music.play(-1)
 
     def events(self, event):
         if event.type == pygame.KEYDOWN:
             from G5.Data.Modules.Scene.Scenes import Settings
             if event.key == pygame.K_j:
+                pygame.mixer.music.fadeout(1200)
                 self.game.set_scene(LorePreGame.LorePreGame(self.game))
             elif event.key == pygame.K_c:
+                pygame.mixer.music.fadeout(1200)
                 self.game.set_scene(Settings.Settings(self.game))
             elif event.key == pygame.K_e:
                 self.game.running = False
@@ -30,7 +36,7 @@ class Menu(Scene):
         pass
 
     def draw(self, screen):
-        screen.fill((13, 130, 100))
+        screen.blit(pygame.image.load("G5/Data/Sprites/menu.jpeg").convert_alpha(), (0, 0))
         screen.blit(self.titulo, (0, 0))
         screen.blit(self.jugar_txt, (0, 32*18))
         screen.blit(self.Configuracion_txt, (0, 32*19))

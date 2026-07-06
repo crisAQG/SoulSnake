@@ -1,5 +1,6 @@
 from G5.Data.Modules.Scene.Scene import Scene
 from G5.Data.Modules.Scene.Scenes.Instruction import Instructions
+from Config import musica
 
 import pygame
 
@@ -10,6 +11,10 @@ class LorePreGame(Scene):
         self.fuente = game.font
         self.titulo = self.fuente.render("Historia:", True, (255, 255, 255))
         self.game_txt = self.fuente.render("Presione [ENTER] para seguir.", True, (255, 255, 255))
+
+        pygame.mixer.music.load("G5/Data/Sounds/lore.mp3")
+        pygame.mixer.music.set_volume(musica)
+        pygame.mixer.music.play(-1)
 
     def events(self, event):
         if event.type == pygame.KEYDOWN:

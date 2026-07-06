@@ -11,7 +11,6 @@ class MapGen:
         self.enemies = []
         self.bullets = []
         self.cruces_fuego = []  # (col, fila, expira_en_ms) del ataque cargado del jefe
-
         self.gen_enemies(4)
         self.gen_object(3, 6)
         self.gen_object(4, 1)
@@ -53,8 +52,7 @@ class MapGen:
     def gen_boss(self):
         """Limpia enemigos normales y coloca al jefe final."""
         self.enemies = []
-        vacios = [(c, f) for f in range(15) for c in range(15) if self.map[f][c] == 0]
-        columna, fila = random.choice(vacios)
+        columna, fila = 7
         self.map[fila][columna] = 2
         jefe = Boss(((columna * 32) + 288, (fila * 32) + 96), "G5/Data/Sprites/cura.png")
         self.enemies.append(jefe)
@@ -62,6 +60,12 @@ class MapGen:
     def matar_enemigo(self, col, fila):
         if self.map[fila][col] == 2:
             self.map[fila][col] = 0
+        for enemigo in self.enemies:
+            if isinstance(enemigo, Boss):
+                enemigo._atacado(True)
+                if enemigo.hp == 0 and self.map[fila][col] == 2:
+                    self.map[fila][col] == 0
+
         self.enemies = [e for e in self.enemies if e.pos_logica != (col, fila)]
 
     def actualizar_enemigos(self, ahora, pos_jugador, cola_jugador, jugador):
@@ -71,7 +75,7 @@ class MapGen:
             enemigo.update_visual()               # suavizado visual
 
             if isinstance(enemigo, Boss):
-                eventos += enemigo.actualizar_jefe(ahora, self, pos_jugador, cola_jugador, jugador)
+                eventos += enemigo.actualizar_jefe(ahora, self, pos_jugador, cola_jugador, jugador, False)
             else:
                 puede_disparar = ahora - enemigo.ultimo_disparo >= enemigo.cooldown_disparo
                 if puede_disparar and enemigo.apuntando_a(self.map, pos_jugador, cola_jugador):
@@ -102,6 +106,7 @@ class MapGen:
                         break
 
             if golpeo:
+                pygame.mixer.Sound("G5\Data\Sounds\death.mp3").play()
                 murio = jugador.recibir_flechazo(self.map, bala.dmg)
                 eventos.append("¡Una flecha te dio!")
                 if murio:
@@ -131,6 +136,8 @@ class MapGen:
                     Tile(pos_x, pos_y, tam, tam, (255, 215, 0), 4, "G5/Data/Sprites/copa.png").draw(screen)
                 elif valor == 5:
                     Tile(pos_x, pos_y, tam, tam, (140, 124, 137), 0).draw(screen)
+                elif valor == 6:
+                    Tile(pos_x, pos_y, tam, tam, (140, 124, 137), 0, "G5/Data/Sprites/cuchillo.png").draw(screen)
 
         # Cruces de fuego del ataque cargado (se limpian solas al expirar)
         ahora = pygame.time.get_ticks()

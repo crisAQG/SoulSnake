@@ -8,11 +8,11 @@ import pygame
 class Game(Scene):
     # Requisitos para pasar de ronda: {ronda: (enemigos_a_matar, copas_a_consumir)}
     REQUISITOS_RONDA = {
-        1: (2, 4),
-        2: (3, 6),
+        1: (1, 4),
+        2: (2, 6),
         3: (4, 7),
-        4: (3, 7),
-        5: (5, 9),
+        4: (2, 7),
+        5: (4, 9),
     }
 
     def __init__(self, game):
@@ -31,7 +31,7 @@ class Game(Scene):
         px_inicial = (pos_inicial[0] * 32) + 288
         py_inicial =( pos_inicial[1] * 32) + 96
         self.plr = Player((px_inicial, py_inicial), (32, 32), (10, 30, 170), 0, 0, 0,
-                   spr_cabeza_sola="G5/Data/Sprites/jugador_cabeza_sola.png",
+                   spr_cabeza_sola="G5/Data/Sprites/jugador cabeza s.png",
                    spr_cabeza="G5/Data/Sprites/Jugador cabeza.png",
                    spr_torso="G5/Data/Sprites/Jugador torso.png",
                    spr_cola="G5/Data/Sprites/Jugador cola.png")
@@ -90,12 +90,13 @@ class Game(Scene):
             if self.ronda == 2:
                 self.map.gen_enemies(2)
             if self.ronda == 3:
-                self.map.gen_enemies(3)
+                self.map.gen_enemies(4)
             if self.ronda == 4:
                 self.map.gen_enemies(3, 2)
             if self.ronda == 5:
                 self.map.gen_enemies(5, 2)
             if self.ronda >= 6:
+                self.map.gen_object(6)
                 self.map.gen_boss()
                 self._mostrar_evento("¡Apareció el jefe final!", (255, 60, 60), 3000)
 
@@ -144,6 +145,7 @@ class Game(Scene):
             if shift_apretado:
                 if self.sprint_inicio is None:
                     self.sprint_inicio = ahora
+                    pygame.mixer.Sound("G5\Data\Sounds\sprint.mp3").play()
                 sprint_activo = (ahora - self.sprint_inicio) < 4000
             else:
                 self.sprint_inicio = None
@@ -169,10 +171,14 @@ class Game(Scene):
                     self.map.gen_object(4, 1)
                     self._revisar_avance_ronda()
 
+                elif resultado == "cuchillo":
+                    self.texto_copa = self.fuente.render("¡Atacaste al obispo! -1 de vida a tu enemigo.", True, (255, 215, 0))
+                    self.texto_copa_hasta = ahora + 2000
+                    
                 elif resultado == "enemigo_muerto":
                     self.enemigos_ronda += 1
                     self.enemigos_totales += 1
-                    self._mostrar_evento("¡Enemigo eliminado con sprint!", (120, 255, 120))
+                    self._mostrar_evento("¡Enemigo muerto con sprint!", (120, 255, 120))
                     if self.ronda == 6 and not self.map.enemies:
                         self._ir_a_outro(1)
                     else:

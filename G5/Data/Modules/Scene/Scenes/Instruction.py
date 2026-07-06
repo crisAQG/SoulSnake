@@ -14,6 +14,7 @@ class Instructions(Scene):
     def events(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
+                pygame.mixer.music.fadeout(1200)
                 self.game.set_scene(Game(self.game))
 
     def update(self):

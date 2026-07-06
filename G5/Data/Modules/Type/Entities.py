@@ -164,10 +164,11 @@ class Boss(Enemy):
         self.fase_jefe = "reposo"
         self.contador_ataques = 0
         self.ultimo_cambio = pygame.time.get_ticks()
-        self.duracion_reposo = 13000   # 13s de descanso por ciclo
+        self.duracion_reposo = 9000   # 9s de descanso por ciclo
         self.duracion_alerta = 1000    # 1s de aviso antes de disparar
-        self.duracion_pausa = 800      # pausa corta entre ataques rápidos
-        self.velocidad_bala = 5
+        self.duracion_pausa = 1200      # pausa corta entre ataques rápidos
+        self.velocidad_bala = 6
+        self.hp = 20
 
     def actualizar_jefe(self, ahora, map_gen, pos_jugador, cola_jugador, jugador):
         transcurrido = ahora - self.ultimo_cambio
@@ -197,12 +198,16 @@ class Boss(Enemy):
                 eventos.append("¡El jefe ataca de nuevo!")
 
         return eventos
+    
+    def _atacado(self, fueAtacado=False):
+        if fueAtacado:
+            self.hp -= 1
 
     def _ataque_cruz(self, map_gen):
         """Ataque rápido: 4 balas en cruz (arriba, abajo, izq, der)."""
         col, fila = self.pos_logica
         origen = (col * 32 + OFFSET_X, fila * 32 + OFFSET_Y)
-        for direccion in [(0, -1), (0, 1), (-1, 0), (1, 0)]:
+        for direccion in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (-1, 0), (1, 0)]:
             map_gen.bullets.append(Bullet(origen, direccion, self.velocidad_bala, self.dmg))
 
     def _ataque_cargado(self, map_gen, pos_jugador, cola_jugador, jugador):
@@ -271,6 +276,7 @@ class Player(Entities):
                     self.cola_direccion.pop()
                 tablero[ultimo_fila][ultimo_col] = 0
                 self.cola_visual.pop()
+                pygame.mixer.Sound("G5\Data\Sounds\death.mp3").play()
             else:
                 return True
         return False
@@ -297,8 +303,9 @@ class Player(Entities):
         pos_elem = tablero[ind_nueva_fila][ind_nueva_col]
         resultado_extra = None
 
-        if pos_elem == 2:
+        if pos_elem == 2 and not isinstance(pos_elem == 2, Boss):
             if sprintando and len(self.cola) > 0:
+                pygame.mixer.Sound("G5\Data\Sounds\death.mp3").play()
                 if map_gen:
                     map_gen.matar_enemigo(ind_nueva_col, ind_nueva_fila)
                 ultimo_col, ultimo_fila = self.cola.pop()
@@ -310,11 +317,15 @@ class Player(Entities):
                 resultado_extra = "enemigo_muerto"
             else:
                 return "derrota", pos_logica
+        if pos_elem == 6:
+            pass 
 
         if pos_elem == 3:
             return "derrota", pos_logica
         if pos_elem == 5:
             return "derrota", pos_logica
+        if pos_elem == 6:
+            return "cuchillo", pos_logica
 
         copa = (pos_elem == 4)
 
