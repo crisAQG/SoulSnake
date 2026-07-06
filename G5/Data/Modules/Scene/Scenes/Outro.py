@@ -1,4 +1,5 @@
 from G5.Data.Modules.Scene.Scene import Scene
+from Config import musica
 
 import pygame
 
@@ -16,9 +17,15 @@ class Outro(Scene):
         self.fuente = game.font
 
         if state == 1:
-            self.titulo = self.fuente.render("Ganaste. La historia cerro una puerta dañada.", True, (255, 255, 255))
+            self.titulo = self.fuente.render("Ganaste, ¿pero habrá valido totalmente la pena?", True, (255, 255, 255))
+            pygame.mixer.music.load("G5/Data/Sounds/outro-win.mp3")
+            pygame.mixer.music.set_volume(musica)
+            pygame.mixer.music.play()
         else:
             self.titulo = self.fuente.render("Haz muerto en el intento, puedes volver a hacerlo.", True, (255, 255, 255))
+            pygame.mixer.music.load("G5/Data/Sounds/outro-lose.mp3")
+            pygame.mixer.music.set_volume(musica)
+            pygame.mixer.music.play(-1)
 
         self.stats_txt = self.fuente.render(
             f"Copas: {copas}   Enemigos eliminados: {enemigos}   Puntaje: {puntaje}",
@@ -32,9 +39,11 @@ class Outro(Scene):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 from G5.Data.Modules.Scene.Scenes.Menu import Menu
+                pygame.mixer.music.fadeout(1000)
                 self.game.set_scene(Menu(self.game))
             elif event.key == pygame.K_j:
                 from G5.Data.Modules.Scene.Scenes.Game import Game
+                pygame.mixer.music.fadeout(1000)
                 self.game.set_scene(Game(self.game))
 
     def update(self):

@@ -1,8 +1,8 @@
 import pygame
-import math
 import random
 
 from G5.Data.Modules.Type.SpriteSheet import SpriteSheet
+from Config import sfx
 
 
 OFFSET_X = 288
@@ -208,7 +208,7 @@ class Boss(Enemy):
         col, fila = self.pos_logica
         origen = (col * 32 + OFFSET_X, fila * 32 + OFFSET_Y)
         for direccion in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (-1, 0), (1, 0)]:
-            map_gen.bullets.append(Bullet(origen, direccion, self.velocidad_bala, self.dmg))
+            map_gen.bullets.append(Bullet(origen, direccion, self.velocidad_bala, self.dmg, "G5/Data/Sprites/bola de fuego.png"))
 
     def _ataque_cargado(self, map_gen, pos_jugador, cola_jugador, jugador):
         """Ataque cargado (cada 5to ataque): cruces de fuego en celdas random."""
@@ -303,9 +303,20 @@ class Player(Entities):
         pos_elem = tablero[ind_nueva_fila][ind_nueva_col]
         resultado_extra = None
 
-        if pos_elem == 2 and not isinstance(pos_elem == 2, Boss):
+        pos_enemigo = None
+        if map_gen:
+            pos_enemigo = next(
+            (e for e in map_gen.enemies if e.pos_logica == (ind_nueva_col, ind_nueva_fila)),
+            None
+            )
+        
+        es_jefe = isinstance(pos_enemigo, Boss)
+
+        if pos_elem == 2:
+            if es_jefe:
+                return "derrota", pos_logica
             if sprintando and len(self.cola) > 0:
-                pygame.mixer.Sound("G5\Data\Sounds\death.mp3").play()
+                pygame.mixer.Sound("G5\Data\Sounds\death.mp3").set_volume(sfx).play()
                 if map_gen:
                     map_gen.matar_enemigo(ind_nueva_col, ind_nueva_fila)
                 ultimo_col, ultimo_fila = self.cola.pop()
@@ -324,10 +335,9 @@ class Player(Entities):
             return "derrota", pos_logica
         if pos_elem == 5:
             return "derrota", pos_logica
-        if pos_elem == 6:
-            return "cuchillo", pos_logica
 
         copa = (pos_elem == 4)
+        cuchillo = (pos_elem == 6) 
 
         self.cola.insert(0, (ind_actual_col, ind_actual_fila))
         self.cola_direccion.insert(0, direccion)
@@ -351,6 +361,9 @@ class Player(Entities):
         if copa:
             self.agregar_segmento()
             return "copa", (ind_nueva_col, ind_nueva_fila)
+        if cuchillo:
+            self.cuchillos += 1
+            return "cuchillo", (ind_nueva_col, ind_nueva_fila)
         if resultado_extra:
             return resultado_extra, (ind_nueva_col, ind_nueva_fila)
         return "ok", (ind_nueva_col, ind_nueva_fila)

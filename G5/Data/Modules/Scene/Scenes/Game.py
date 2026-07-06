@@ -8,11 +8,11 @@ import pygame
 class Game(Scene):
     # Requisitos para pasar de ronda: {ronda: (enemigos_a_matar, copas_a_consumir)}
     REQUISITOS_RONDA = {
-        1: (1, 4),
-        2: (2, 6),
-        3: (4, 7),
+        1: (1, 3),
+        2: (2, 4),
+        3: (4, 6),
         4: (2, 7),
-        5: (4, 9),
+        5: (4, 8),
     }
 
     def __init__(self, game):
@@ -84,9 +84,6 @@ class Game(Scene):
             self.copas_ronda = 0
             self._mostrar_evento(f"¡Ronda {self.ronda}!", (120, 220, 255), 2500)
 
-            # TODO: la ronda 6 es el jefe final (mecánica tipo Undertale, con
-            # turnos de ataque/descanso). Todavía no está implementada; por
-            # ahora, llegar a ronda 6 se trata como victoria de la partida.
             if self.ronda == 2:
                 self.map.gen_enemies(2)
             if self.ronda == 3:
